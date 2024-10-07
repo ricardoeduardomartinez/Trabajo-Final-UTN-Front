@@ -1,37 +1,23 @@
 import React from 'react';
 
-const ZapatosMujer = (props) => {
-  const calzadoMujerHTML = props.calzadoMujer.map((calzado) => {
-    return (
-      <div key={calzado.id}>
-        <h3>{calzado.Nombre}</h3>
-        
-        {/* Mostrar la imagen adaptada */}
-        <img
-          src={calzado.Imagen}
-          alt={calzado.Nombre}
-          style={{
-            width: '150px', // Adaptar el ancho de la imagen
-            height: 'auto', // Mantener la proporción
-            objectFit: 'cover', // Asegurarse de que la imagen se ajuste bien
-            borderRadius: '10px' // Bordes redondeados opcionales
-          }}
-        />
-
-        <p>Talles: {calzado.Talles}</p>
-        <p>Descripción: {calzado.Descripcion}</p>
-        <p>Precio: {calzado.Precio}</p>
-        <br />
-      </div>
-    );
-  });
-
+const ZapatosMujer = ({ titulo, calzadoMujer, agregarAlCarrito }) => {
   return (
-    <div> 
-      <h1>{props.titulo}</h1>
-      {calzadoMujerHTML}
+    <div>
+      <h2>{titulo}</h2>
+      <div className='divCalzadoMujer'>
+        {calzadoMujer.map((calzado) => (
+          <div className='calzadoMujer' key={calzado.id}>
+            <h3>{calzado.Nombre}</h3>
+            <img src={calzado.Imagen} alt={calzado.Nombre} style={{ width: '100px' }} />
+            <p>Precio: {calzado.Precio}</p> {/* Asegúrate de agregar $ aquí */}
+            <button onClick={() => agregarAlCarrito(calzado)}>Agregar al carrito</button>
+          </div>
+        ))}
+      </div>
     </div>
   );
-}
+};
 
 export default ZapatosMujer;
+
+

@@ -1,84 +1,135 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import EncabezaCuotasYEnvios from './components/EncabezaCuotasYEnvios';
-import HeaderNav from './components/headerNav';
-import DescripcionYOrigen from './components/descripcionYOrigen';
-import ZapatosMujer from './components/zapatosMujer';
-import ZapatosHombres from './components/zapatosHombres';
-import FormularioAgregarCalzado from './components/formularioAgregarCalzado';
-
+import HeaderNav from './Components/headerNav';
+import DescripcionYOrigen from './Components/descripcionYOrigen';
+import Footer from './Components/footer';
+import FormularioAgregarCalzado from './Components/formularioAgregarCalzado';
+import PaginaProductos from './Components/PaginaProductos';
+import ZapatosMujer from './components/ZapatosMujer';
+import ZapatosHombres from './Components/zapatosHombres';
+import Carrito from './Components/Carrito';
+import Ventas from './Components/Ventas';
 
 function App() {
-  // Cargar calzado desde localStorage o inicializar con valores por defecto
-  const obtenerCalzadoMujerLocalStorage = () => {
-    const calzadoGuardado = localStorage.getItem('calzadoMujer');
-    return calzadoGuardado ? JSON.parse(calzadoGuardado) : [
-      {
-        id: 1,
-        Nombre: 'Gaby Negro',
-        Imagen: './gaby-negro.jpg',
-        Talles: 'del 35 al 41',
-        Descripcion: 'Calzado de Cuero',
-        Precio: '$10000'
-      },
-      {
-        id: 2,
-        Nombre: 'Romi Negro',
-        Imagen: './romi-negro.jpg',
-        Talles: 'del 35 al 41',
-        Descripcion: 'Calzado de Cuero',
-        Precio: '$13000'
-      }
-    ];
-  };
+  const [calzadoMujer, setCalzadoMujer] = useState([]);
+  const [calzadoHombre, setCalzadoHombre] = useState([]); 
+  const [carrito, setCarrito] = useState([]); 
+  const [ventas, setVentas] = useState([]);
 
-  const obtenerCalzadoHombreLocalStorage = () => {
-    const calzadoGuardado = localStorage.getItem('calzadoHombre');
-    return calzadoGuardado ? JSON.parse(calzadoGuardado) : [
-      {
-        id: 1,
-        Nombre: 'Lucas Azul',
-        Imagen: './lucas-azul.jpg',
-        Talles: 'del 39 al 45',
-        Descripcion: 'Calzado de Cuero',
-        Precio: '$11000'
-      }
-    ];
-  };
+  useEffect(() => {
+    const datosCalzadoMujer = localStorage.getItem('calzadoMujer');
+    const datosCalzadoHombre = localStorage.getItem('calzadoHombre');
+    const ventasGuardadas = localStorage.getItem('ventas');
 
-  // Estados iniciales usando localStorage
-  const [calzadoMujer, setCalzadoMujer] = useState(obtenerCalzadoMujerLocalStorage);
-  const [calzadoHombre, setCalzadoHombre] = useState(obtenerCalzadoHombreLocalStorage);
+    if (datosCalzadoMujer) {
+      setCalzadoMujer(JSON.parse(datosCalzadoMujer));
+    }
+    if (datosCalzadoHombre) {
+      setCalzadoHombre(JSON.parse(datosCalzadoHombre));
+    }
+    if (ventasGuardadas) {
+      setVentas(JSON.parse(ventasGuardadas));
+    }
+  }, []);
 
-  // Guardar en localStorage cuando cambie calzadoMujer o calzadoHombre
   useEffect(() => {
     localStorage.setItem('calzadoMujer', JSON.stringify(calzadoMujer));
-  }, [calzadoMujer]);
+    localStorage.setItem('calzadoHombre', JSON.stringify(calzadoHombre));
+  }, [calzadoMujer, calzadoHombre]);
 
   useEffect(() => {
-    localStorage.setItem('calzadoHombre', JSON.stringify(calzadoHombre));
-  }, [calzadoHombre]);
+    localStorage.setItem('ventas', JSON.stringify(ventas));  // Guardar ventas al cambiar
+  }, [ventas]);
 
-  // Función para agregar un nuevo calzado femenino o masculino
   const agregarCalzado = (nuevoCalzado, tipo) => {
+    const nuevoCalzadoConId = { ...nuevoCalzado, id: Date.now() }; 
     if (tipo === 'femenino') {
-      setCalzadoMujer([...calzadoMujer, { ...nuevoCalzado, id: calzadoMujer.length + 1 }]);
-    } else if (tipo === 'masculino') {
-      setCalzadoHombre([...calzadoHombre, { ...nuevoCalzado, id: calzadoHombre.length + 1 }]);
+      setCalzadoMujer((prev) => [...prev, nuevoCalzadoConId]);
+    } else {
+      setCalzadoHombre((prev) => [...prev, nuevoCalzadoConId]);
     }
   };
 
-  return (
-    <div>
-      <EncabezaCuotasYEnvios />
-      <HeaderNav />
-      <DescripcionYOrigen />
-      
-      <ZapatosMujer titulo="Modelos destacados de la temporada (Femenino)" calzadoMujer={calzadoMujer} />
-      <ZapatosHombres titulo="Modelos destacados de la temporada (Masculino)" calzadoHombres={calzadoHombre} />
+  const obtenerUltimosModelosMujer = () => {
+    return calzadoMujer.slice(-6);
+  };
 
-      {/* Formulario para agregar nuevo calzado */}
-      <FormularioAgregarCalzado agregarCalzado={agregarCalzado} />
-    </div>
+  const obtenerUltimosModelosHombre = () => {
+    return calzadoHombre.slice(-6);
+  };
+
+  const agregarAlCarrito = (producto) => {
+    const productoConId = { ...producto, id: Date.now() }; 
+    setCarrito((prev) => [...prev, productoConId]); 
+  };
+
+  const finalizarCompra = (datosCliente) => {
+    const nuevaVenta = {
+      cliente: datosCliente,
+      productos: carrito.map(item => ({
+        producto: item.Nombre,
+        precio: item.Precio
+      })),
+    };
+
+    setVentas((prevVentas) => [...prevVentas, nuevaVenta]);  // Actualizar estado de ventas
+    setCarrito([]); // Vaciar el carrito
+  };
+
+  const quitarDelCarrito = (itemToRemove) => {
+    setCarrito((prevCarrito) => prevCarrito.filter(item => item.id !== itemToRemove.id)); 
+  };
+
+  return (
+    <Router>
+      <EncabezaCuotasYEnvios />
+      <HeaderNav carrito={carrito.length} />
+      <DescripcionYOrigen />
+      <Routes>
+        <Route
+          path="/formulario"
+          element={<FormularioAgregarCalzado agregarCalzado={agregarCalzado} />}
+        />
+        <Route 
+          path="/ventas" 
+          element={<Ventas ventas={ventas} />} 
+        />
+        <Route
+          path="/productos"
+          element={
+            <PaginaProductos
+              calzadoHombre={calzadoHombre}
+              calzadoMujer={calzadoMujer}
+              agregarAlCarrito={agregarAlCarrito}
+            />
+          }
+        />
+        <Route 
+          path="/carrito" 
+          element={
+            <Carrito 
+              carrito={carrito} 
+              finalizarCompra={finalizarCompra} 
+              quitarDelCarrito={quitarDelCarrito} 
+            />
+          } 
+        />
+      </Routes>
+
+      <ZapatosMujer
+        titulo="Últimos Modelos Femeninos"
+        calzadoMujer={obtenerUltimosModelosMujer()}
+        agregarAlCarrito={agregarAlCarrito}
+      />
+      <ZapatosHombres
+        titulo="Últimos Modelos Masculinos"
+        calzadoHombres={obtenerUltimosModelosHombre()}
+        agregarAlCarrito={agregarAlCarrito}
+      />
+
+      <Footer />
+    </Router>
   );
 }
 
