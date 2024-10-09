@@ -15,6 +15,7 @@ const Ventas = ({ ventas }) => {
           <div key={index} style={{ marginBottom: '20px', border: '1px solid black', padding: '10px' }}>
             <h3>Datos del cliente:</h3>
             <p>Nombre: {venta.cliente.nombre}</p>
+            <p>Telefono: {venta.cliente.telefono}</p>
             <p>Dirección: {venta.cliente.direccion}</p>
             <p>Correo electrónico: {venta.cliente.correo_electronico}</p>
 
